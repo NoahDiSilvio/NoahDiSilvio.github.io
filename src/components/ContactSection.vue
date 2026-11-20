@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppIcon from './AppIcon.vue'
 const starCount = 40
 
 const stars = Array.from({ length: starCount }, () => ({
@@ -35,13 +36,13 @@ const stars = Array.from({ length: starCount }, () => ({
 
       <h3 class="title">Laten we<br /><span class="fun">praten.</span></h3>
 
-      <a href="mailto:noah.di.silvio7@gmail.com" class="email">noah.di.silvio7@gmail.com ↗</a>
+      <a href="mailto:noah.di.silvio7@gmail.com" class="email">noah.di.silvio7@gmail.com <AppIcon name="up-right" /></a>
 
       <div class="bottom">
         <p class="small-caps cv-text">Liever eerst mijn cv bekijken?</p>
 
         <a :href="`/cv.pdf`" download="CV-Noah-Di-Silvio.pdf" class="cv">
-          Download CV <span>↓</span>
+          Download CV <span><AppIcon name="download" /></span>
         </a>
       </div>
     </div>

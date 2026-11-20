@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppIcon from './AppIcon.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const showPhoto = ref(true)
@@ -68,10 +69,10 @@ onUnmounted(() => {
       <div class="actions">
         <a href="#projects" class="btn-arrow">
           <span class="label">Bekijk mijn werk</span>
-          <span class="arrow">→</span>
+          <span class="arrow"><AppIcon name="right" /></span>
         </a>
         <a :href="`/cv.pdf`" download="CV-Noah-Di-Silvio.pdf" class="btn-outline">
-          Download CV <span>↓</span>
+          Download CV <span><AppIcon name="download" /></span>
         </a>
       </div>
     </div>
@@ -175,7 +176,6 @@ h1 {
   color: var(--muted);
 }
 
-/* intro-animaties */
 .content > * {
   opacity: 0;
   animation: fadeUp 0.9s cubic-bezier(0.2, 0.65, 0.3, 1) forwards;
@@ -207,7 +207,6 @@ h1 {
 @keyframes fadeIn { to { opacity: 1; } }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* zwart-wit + kleur bij hover, enkel met muis */
 @media (hover: hover) {
   .photo {
     filter: grayscale(1) contrast(1.1);
@@ -217,7 +216,6 @@ h1 {
   .visual:hover .photo { filter: none; }
 }
 
-/* gsm: foto boven de tekst */
 @media (max-width: 48rem) {
   .hero {
     grid-template-columns: minmax(0, 1fr);

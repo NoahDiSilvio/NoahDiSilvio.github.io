@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppIcon from './AppIcon.vue'
 const path = window.location.pathname
 document.title = 'Noah Di Silvio | 404'
 </script>
@@ -16,14 +17,14 @@ document.title = 'Noah Di Silvio | 404'
 
       <p class="terminal">
         <span class="muted">$</span> GET {{ path }}
-        <span class="red">→ 404 Not Found</span><span class="cursor">_</span>
+        <span class="red"><AppIcon name="right" /> 404 Not Found</span><span class="cursor">_</span>
       </p>
 
       <p class="text">Misschien zit ze nog in mijn backlog, of klopt de link gewoon niet.</p>
 
       <a href="/" class="btn-arrow">
         <span class="label">Terug naar home</span>
-        <span class="arrow">→</span>
+        <span class="arrow"><AppIcon name="right" /></span>
       </a>
     </section>
 

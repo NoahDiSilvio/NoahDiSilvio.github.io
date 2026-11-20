@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppIcon from './AppIcon.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { timeline } from '../data/timeline'
 
@@ -8,8 +9,6 @@ const reached = ref(-1)
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/* De lijn kleurt mee terwijl je scrollt; een stap is "bereikt"
-   zodra zijn bolletje het midden van het scherm passeert. */
 function update() {
   if (!list.value) return
   const mid = window.innerHeight * 0.6
@@ -79,7 +78,7 @@ onUnmounted(() => {
           <p v-if="item.tags" class="tags small-caps">{{ item.tags.join(' · ') }}</p>
           <a v-if="item.type === 'Stage'" href="#contact" class="btn-arrow">
             <span class="label">Laten we praten</span>
-            <span class="arrow">→</span>
+            <span class="arrow"><AppIcon name="right" /></span>
           </a>
         </div>
       </li>
@@ -96,7 +95,6 @@ onUnmounted(() => {
   padding: 1rem 0;
 }
 
-/* ---------- de lijn ---------- */
 .rail {
   position: absolute;
   top: 0;
@@ -121,7 +119,6 @@ onUnmounted(() => {
   transform: scaleY(0);
 }
 
-/* ---------- een stap ---------- */
 .item {
   position: relative;
   display: grid;
@@ -166,7 +163,6 @@ onUnmounted(() => {
   max-width: 28rem;
 }
 
-/* afwisselend: kaart links, jaartal rechts */
 .right .period {
   grid-column: 3;
   justify-self: start;
@@ -219,7 +215,6 @@ h3 {
   margin-top: 1.5rem;
 }
 
-/* ---------- bereikt ---------- */
 .reached .node {
   background: var(--text);
   border-color: var(--text);
@@ -229,7 +224,6 @@ h3 {
   color: var(--text);
 }
 
-/* ---------- de volgende stap: stage ---------- */
 .stage .type {
   color: var(--red);
 }
@@ -282,7 +276,6 @@ h3 {
   transition: color 0.2s;
 }
 
-/* ---------- gsm & tablet: lijn links ---------- */
 @media (max-width: 56.25rem) {
   .rail {
     left: calc(var(--node) / 2);

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppIcon from './AppIcon.vue'
 import { computed, ref, onUnmounted } from 'vue'
 import type { Project } from '../data/projects'
 
@@ -112,10 +113,10 @@ onUnmounted(() => cancelAnimationFrame(frame))
 
       <div class="links">
         <a v-if="project.demo" :href="project.demo" target="_blank" rel="noopener" class="demo">
-          {{ project.demoLabel ?? 'Live demo' }} <span>↗</span>
+          {{ project.demoLabel ?? 'Live demo' }} <span><AppIcon name="up-right" /></span>
         </a>
         <a v-if="project.github" :href="project.github" target="_blank" rel="noopener" class="code small-caps">
-          Bekijk code ↗
+          Bekijk code <AppIcon name="up-right" />
         </a>
         <span v-if="!project.demo && !project.github" class="soon small-caps">Binnenkort online</span>
       </div>
@@ -147,7 +148,6 @@ onUnmounted(() => cancelAnimationFrame(frame))
   grid-row: 1;
 }
 
-/* ---------- 3D-tilt ---------- */
 .media {
   perspective: 1100px;
 }
@@ -167,7 +167,6 @@ onUnmounted(() => cancelAnimationFrame(frame))
   will-change: transform;
 }
 
-/* tijdens het bewegen volgt het vlak de muis bijna direct */
 .tilt.is-tilting {
   transition:
     transform 0.12s ease-out,
@@ -238,11 +237,9 @@ onUnmounted(() => cancelAnimationFrame(frame))
   color: var(--text);
   font-size: 0.65rem;
   z-index: 3;
-  /* zweeft iets boven de afbeelding, zodat de diepte zichtbaar is */
   transform: translateZ(40px);
 }
 
-/* rode lijn die onder de afbeelding tekent bij hover */
 .line {
   position: absolute;
   left: 0;
@@ -259,7 +256,6 @@ onUnmounted(() => cancelAnimationFrame(frame))
   transform-origin: right;
 }
 
-/* ---------- tekst ---------- */
 .info {
   position: relative;
   grid-column: 9 / 13;
@@ -418,7 +414,6 @@ onUnmounted(() => cancelAnimationFrame(frame))
   }
 }
 
-/* ---------- tablet & gsm ---------- */
 @media (max-width: 56.25rem) {
   .row {
     gap: 1.75rem;
