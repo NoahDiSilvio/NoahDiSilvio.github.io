@@ -1,138 +1,261 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Project } from '../data/projects'
 
-defineProps<{ project: Project; index: number }>()
+const props = defineProps<{ project: Project; index: number }>()
+
+const num = computed(() => String(props.index + 1).padStart(2, '0'))
+const flipped = computed(() => props.index % 2 === 1)
 </script>
 
 <template>
-  <article class="card">
-    <header class="top">
-      <span class="num">{{ String(index + 1).padStart(2, '0') }}</span>
-      <span class="type small-caps"><span class="dot"></span>{{ project.type }}</span>
-    </header>
-
-    <div class="thumb">
+  <article class="row" :class="{ flipped }">
+    <div class="media reveal" :class="flipped ? 'from-right' : 'from-left'">
+      <a
+        v-if="project.demo"
+        :href="project.demo"
+        target="_blank"
+        rel="noopener"
+        class="thumb"
+        :aria-label="`Bekijk ${project.title} (opent in een nieuw tabblad)`"
+        :style="{ background: project.imageBg }"
+      >
+        <img
+          v-if="project.image"
+          :src="project.image"
+          :alt="`Screenshot van ${project.title}`"
+          :class="project.imageFit ?? 'cover'"
+          loading="lazy"
+        />
+      </a>
+      <div v-else class="thumb" :style="{ background: project.imageBg }">
+        <img
+          v-if="project.image"
+          :src="project.image"
+          :alt="`Afbeelding van ${project.title}`"
+          :class="project.imageFit ?? 'cover'"
+          loading="lazy"
+        />
+        <span v-else class="placeholder">{{ project.title }}</span>
+      </div>
       <span v-if="project.status" class="status small-caps">{{ project.status }}</span>
-      <img v-if="project.image" :src="project.image" :alt="`Screenshot van ${project.title}`" />
-      <span v-else class="placeholder">{{ project.title }}</span>
+      <span class="line" aria-hidden="true"></span>
     </div>
 
-    <h3 class="title">{{ project.title }}</h3>
+    <div class="info reveal" style="--delay: 0.15s">
+      <span class="bignum" aria-hidden="true">{{ num }}</span>
 
-    <p class="desc">{{ project.description }}</p>
+      <p class="type small-caps"><span class="dot"></span>{{ project.type }}</p>
 
-    <ul class="tech">
-      <li v-for="t in project.tech" :key="t">{{ t }}</li>
-    </ul>
+      <h3 class="title">{{ project.title }}</h3>
 
-    <div class="links">
-      <a v-if="project.demo" :href="project.demo" target="_blank" class="demo">
-        Live demo <span>↗</span>
-      </a>
-      <a v-if="project.github" :href="project.github" target="_blank" class="code small-caps">
-        Bekijk code ↗
-      </a>
+      <p class="desc">{{ project.description }}</p>
+
+      <div v-if="project.contributions" class="contrib">
+        <p class="contrib-label small-caps">Mijn bijdrage</p>
+        <ul>
+          <li v-for="c in project.contributions" :key="c">{{ c }}</li>
+        </ul>
+      </div>
+
+      <p class="tech small-caps">{{ project.tech.join(' · ') }}</p>
+
+      <div class="links">
+        <a v-if="project.demo" :href="project.demo" target="_blank" rel="noopener" class="demo">
+          {{ project.demoLabel ?? 'Live demo' }} <span>↗</span>
+        </a>
+        <a v-if="project.github" :href="project.github" target="_blank" rel="noopener" class="code small-caps">
+          Bekijk code ↗
+        </a>
+        <span v-if="!project.demo && !project.github" class="soon small-caps">Binnenkort online</span>
+      </div>
     </div>
   </article>
 </template>
 
 <style scoped>
-.card {
+.row {
   display: grid;
-  grid-row: span 6;
-  grid-template-rows: subgrid;
-  row-gap: 0;
-}
-
-.top {
-  display: flex;
-  justify-content: space-between;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2rem;
   align-items: center;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border);
+  padding: 3rem 0;
 }
 
-.num {
-  font-size: 1.4rem;
-  font-weight: 300;
+.row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.media {
+  position: relative;
+  grid-column: 1 / 8;
+}
+
+.flipped .media {
+  grid-column: 6 / 13;
+  grid-row: 1;
+}
+
+.thumb {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-position: top;
+  transition: transform 0.6s cubic-bezier(0.2, 0.65, 0.3, 1), filter 0.5s ease;
+}
+
+.thumb img.cover {
+  object-fit: cover;
+}
+
+.thumb img.contain {
+  object-fit: contain;
+  object-position: center;
+  padding: 12%;
+}
+
+.placeholder {
+  padding: 1rem;
+  font-family: var(--display);
+  font-size: 3rem;
+  color: var(--border);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.status {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.65rem;
+}
+
+/* rode lijn die onder de afbeelding tekent bij hover */
+.line {
+  position: absolute;
+  left: 0;
+  bottom: -0.75rem;
+  width: 100%;
+  height: 0.2rem;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.flipped .line {
+  transform-origin: right;
+}
+
+/* ---------- tekst ---------- */
+.info {
+  position: relative;
+  grid-column: 9 / 13;
+}
+
+.flipped .info {
+  grid-column: 1 / 5;
+  grid-row: 1;
+}
+
+.bignum {
+  position: absolute;
+  top: -4.5rem;
+  right: 0;
+  z-index: -1;
+  font-family: var(--display);
+  font-size: clamp(7rem, 12vw, 11rem);
   line-height: 1;
-  border-bottom: 1px solid var(--text);
+  color: transparent;
+  -webkit-text-stroke: 1px var(--border);
+  pointer-events: none;
+  user-select: none;
+}
+
+.flipped .bignum {
+  right: auto;
+  left: 0;
 }
 
 .type {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  margin: 0;
   color: var(--muted);
-  text-align: right;
-}
-
-.thumb {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  transition: transform 0.4s, filter 0.4s;
-}
-
-.placeholder {
-  padding: 1rem;
-  font-family: var(--display);
-  font-size: 2.5rem;
-  color: var(--border);
-  text-align: center;
-  text-transform: uppercase;
 }
 
 .title {
-  margin-top: 1.5rem;
-  font-size: clamp(2rem, 3vw, 2.75rem);
-  line-height: 0.95;
-  transition: color 0.2s, transform 0.3s;
+  margin-top: 0.75rem;
+  font-size: clamp(2.5rem, 4.5vw, 4rem);
+  line-height: 0.92;
+  transition: color 0.25s, transform 0.3s;
 }
 
 .desc {
-  margin: 0.75rem 0 1.25rem;
-  font-size: 0.9rem;
+  margin: 1rem 0 0;
+  font-size: 0.95rem;
   color: #cfcfcf;
 }
 
-.tech {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 0.4rem;
-  margin: 0 0 1.5rem;
+.contrib {
+  margin-top: 1.25rem;
+}
+
+.contrib-label {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+}
+
+.contrib ul {
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.tech li {
-  padding: 0.25rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 62.438rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.contrib li {
+  position: relative;
+  padding: 0.3rem 0 0.3rem 1.1rem;
+  font-size: 0.9rem;
+  color: #cfcfcf;
+}
+
+.contrib li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.tech {
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  color: var(--red);
 }
 
 .links {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  align-self: start;
   gap: 1.25rem;
+  margin-top: 1.75rem;
 }
 
 .demo {
@@ -140,7 +263,7 @@ defineProps<{ project: Project; index: number }>()
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
-  border-radius: 62.438rem;
+  border-radius: 999px;
   background: var(--red);
   font-size: 0.8rem;
   font-weight: 600;
@@ -148,7 +271,9 @@ defineProps<{ project: Project; index: number }>()
   text-transform: uppercase;
 }
 
-.demo span { transition: transform 0.2s; }
+.demo span {
+  transition: transform 0.2s;
+}
 
 .code {
   border-bottom: 1px solid var(--muted);
@@ -157,25 +282,72 @@ defineProps<{ project: Project; index: number }>()
   transition: color 0.2s, border-color 0.2s;
 }
 
-.status {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  z-index: 1;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.65rem;
+.soon {
+  color: var(--muted);
 }
 
 @media (hover: hover) {
-  .thumb img { filter: grayscale(0.6); }
+  .thumb img {
+    filter: grayscale(0.7);
+  }
 
-  .card:hover .thumb img { filter: none; transform: scale(1.04); }
-  .card:hover .title { color: var(--red); transform: translateX(0.5rem); }
+  .row:hover .thumb img {
+    filter: none;
+    transform: scale(1.03);
+  }
 
-  .demo:hover span { transform: translate(0.125rem, -0.125rem); }
-  .code:hover { color: var(--text); border-color: var(--text); }
+  .row:hover .line {
+    transform: scaleX(1);
+  }
+
+  .row:hover .title {
+    color: var(--red);
+    transform: translateX(0.4rem);
+  }
+
+  .flipped:hover .title {
+    transform: translateX(0.4rem);
+  }
+
+  .demo:hover span {
+    transform: translate(0.125rem, -0.125rem);
+  }
+
+  .code:hover {
+    color: var(--text);
+    border-color: var(--text);
+  }
+}
+
+/* ---------- tablet & gsm ---------- */
+@media (max-width: 56.25rem) {
+  .row {
+    gap: 1.75rem;
+    padding: 2.5rem 0;
+  }
+
+  .media,
+  .flipped .media,
+  .info,
+  .flipped .info {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .bignum,
+  .flipped .bignum {
+    top: -1.5rem;
+    right: 0;
+    left: auto;
+    font-size: 6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb img,
+  .line,
+  .title {
+    transition: none;
+  }
 }
 </style>

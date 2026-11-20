@@ -120,8 +120,6 @@ const hobbies = ['Voetbal', 'Muziek', 'Vrienden']
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2.5rem;
   margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border);
 }
 
 .label {
@@ -138,7 +136,6 @@ const hobbies = ['Voetbal', 'Muziek', 'Vrienden']
   justify-content: space-between;
   gap: 1rem;
   padding: 0.55rem 0;
-  border-bottom: 1px solid var(--border);
 }
 
 .facts div:first-child { padding-top: 0; }
