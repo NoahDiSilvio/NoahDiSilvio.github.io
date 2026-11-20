@@ -1,16 +1,64 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import type { Project } from '../data/projects'
 
 const props = defineProps<{ project: Project; index: number }>()
 
 const num = computed(() => String(props.index + 1).padStart(2, '0'))
 const flipped = computed(() => props.index % 2 === 1)
+
+/* ---------- 3D-tilt ----------
+   Enkel met een muis en zonder reduced-motion. De stand wordt per frame
+   als CSS-variabelen gezet, zodat Vue niet bij elke muisbeweging rendert. */
+const canTilt =
+  window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+  !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const tilt = ref<HTMLElement | null>(null)
+const tilting = ref(false)
+const MAX_X = 7 // graden voor/achterover
+const MAX_Y = 9 // graden links/rechts
+let frame = 0
+
+function onTiltMove(e: PointerEvent) {
+  if (!canTilt || e.pointerType !== 'mouse' || !tilt.value) return
+  const el = tilt.value
+  const { clientX, clientY } = e
+  tilting.value = true
+  if (frame) return
+  frame = requestAnimationFrame(() => {
+    frame = 0
+    const r = el.getBoundingClientRect()
+    const px = (clientX - r.left) / r.width
+    const py = (clientY - r.top) / r.height
+    el.style.setProperty('--ry', `${((px - 0.5) * 2 * MAX_Y).toFixed(2)}deg`)
+    el.style.setProperty('--rx', `${((0.5 - py) * 2 * MAX_X).toFixed(2)}deg`)
+    el.style.setProperty('--gx', `${(px * 100).toFixed(1)}%`)
+    el.style.setProperty('--gy', `${(py * 100).toFixed(1)}%`)
+  })
+}
+
+function onTiltLeave() {
+  cancelAnimationFrame(frame)
+  frame = 0
+  tilting.value = false
+  tilt.value?.style.setProperty('--rx', '0deg')
+  tilt.value?.style.setProperty('--ry', '0deg')
+}
+
+onUnmounted(() => cancelAnimationFrame(frame))
 </script>
 
 <template>
   <article class="row" :class="{ flipped }">
     <div class="media reveal" :class="flipped ? 'from-right' : 'from-left'">
+      <div
+        ref="tilt"
+        class="tilt"
+        :class="{ 'is-tilting': tilting }"
+        @pointermove="onTiltMove"
+        @pointerleave="onTiltLeave"
+      >
       <a
         v-if="project.demo"
         :href="project.demo"
@@ -39,6 +87,8 @@ const flipped = computed(() => props.index % 2 === 1)
         <span v-else class="placeholder">{{ project.title }}</span>
       </div>
       <span v-if="project.status" class="status small-caps">{{ project.status }}</span>
+      <span class="glare" aria-hidden="true"></span>
+      </div>
       <span class="line" aria-hidden="true"></span>
     </div>
 
@@ -97,6 +147,52 @@ const flipped = computed(() => props.index % 2 === 1)
   grid-row: 1;
 }
 
+/* ---------- 3D-tilt ---------- */
+.media {
+  perspective: 1100px;
+}
+
+.tilt {
+  --rx: 0deg;
+  --ry: 0deg;
+  --gx: 50%;
+  --gy: 50%;
+
+  position: relative;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition:
+    transform 0.7s cubic-bezier(0.2, 0.65, 0.3, 1),
+    box-shadow 0.7s ease;
+  will-change: transform;
+}
+
+/* tijdens het bewegen volgt het vlak de muis bijna direct */
+.tilt.is-tilting {
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.4s ease;
+  box-shadow: 0 2.5rem 4rem -1.5rem rgba(0, 0, 0, 0.75);
+}
+
+.glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--gx) var(--gy),
+    rgba(255, 255, 255, 0.16),
+    transparent 55%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.tilt.is-tilting .glare {
+  opacity: 1;
+}
+
 .thumb {
   display: grid;
   place-items: center;
@@ -141,6 +237,9 @@ const flipped = computed(() => props.index % 2 === 1)
   background: var(--bg);
   color: var(--text);
   font-size: 0.65rem;
+  z-index: 3;
+  /* zweeft iets boven de afbeelding, zodat de diepte zichtbaar is */
+  transform: translateZ(40px);
 }
 
 /* rode lijn die onder de afbeelding tekent bij hover */
